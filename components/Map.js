@@ -11,7 +11,7 @@ const Map = () => {
   const [map, setMap] = React.useState(null);
 
   const [variables, setVariables] = React.useState({
-    city: "Colorado Springs",
+    city: "Albuquerque",
   });
 
   function handleFlyTo(arr) {
@@ -39,15 +39,6 @@ const Map = () => {
       <input
         type="text"
         value={variables.code}
-        onChange={(e) =>
-          setVariables((prevState) => ({
-            ...prevState,
-            city: e.target.value,
-          }))
-        }
-      />
-      <small></small>
-      <button
         onClick={
           hasCity &&
           handleFlyTo([
@@ -55,12 +46,18 @@ const Map = () => {
             data?.us_states[0]?.us_cities[0].longitude,
           ])
         }
-      >
-        {hasCity ? `Fly me to ${variables.city}` : "Search "}
-      </button>
+        onChange={(e) =>
+          setVariables((prevState) => ({
+            ...prevState,
+            city: e.target.value,
+          }))
+        }
+      />
+      <small>{hasCity ? `Fly me to ${variables.city}` : "Search "}</small>
 
       <MapContainer
         whenCreated={setMap}
+        id="map"
         center={defaultCenter}
         zoom={14}
         scrollWheelZoom={true}
