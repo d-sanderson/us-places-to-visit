@@ -12,15 +12,20 @@ export const stateQuery = `query stateQuery($code:String!) {
   }
   `;
 
-export const cityQuery = `query cityQuery($city: String!) {
-    us_states(where: {us_cities: {city: {_eq: $city}}}) {
-      state_code
-      state_name
-      us_cities(where: {city: {_eq: $city}}) {
-        county
-        city
-        latitude
-        longitude
+export const cityQuery = `query citiesQuery2($city: String!) {
+    us_cities_aggregate(where: {city: {_eq: $city}}) {
+      aggregate {
+        count
       }
     }
-  }`;
+      us_cities(where: {city: {_eq: $city}}) {
+        city
+        county
+        latitude
+        longitude
+        us_state {
+          state_name
+        }
+      }
+    }
+  `;

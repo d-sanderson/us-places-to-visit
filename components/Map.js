@@ -1,6 +1,6 @@
 import React from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { cityQuery} from "../queries";
+import { cityQuery, citiesQuery2 } from "../queries";
 import { startCase } from "lodash";
 import useSWR from "swr";
 import "leaflet/dist/leaflet.css";
@@ -17,13 +17,15 @@ const Map = () => {
 
   const handleFlyTo = (arr) => map.flyTo(arr, 14, { duration: 2 });
 
-  const { data } = useSWR([cityQuery, variables], fetcher);
   const hasCity = Boolean(data?.us_states[0]?.us_cities[0]);
+  const { data } = useSWR([cityQuery, variables], fetcher);
+  const markers = data?.us_cities.map((el) => {
+    const { latitude, longitude, city, county } = el;
+    const { state_code, state_name } = el.us_state;
 
-  const markers = data?.us_states.map((el) => {
-    const { state_code, state_name, us_cities } = el;
-    const { latitude, longitude, city, county } = us_cities[0];
+    console.log(el)
     return (
+
       <Marker key={el.id} position={[latitude, longitude]} animate={true}>
         <Popup>
           {city}, {county}
@@ -63,6 +65,7 @@ const Map = () => {
                 ? `✈️✈️✈️Fly me to ${variables.city}, ${data?.us_states[0].state_name}✈️✈️✈️`
                 : "✈️✈️✈️Lets go somewhere!✈️✈️✈️"}
             </button>
+            {data?.us_cities.length > 1 && <>There are {data?.us_cities.length} cities in the US with the name {variables.city}</> }
           </small>
         </form>
       </aside>
