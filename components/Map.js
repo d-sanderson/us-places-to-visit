@@ -1,6 +1,7 @@
 import React from "react";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import { cityQuery, stateQuery } from "../queries";
+import { cityQuery} from "../queries";
+import { startCase } from "lodash";
 import useSWR from "swr";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility/dist/leaflet-defaulticon-compatibility.css";
@@ -9,19 +10,16 @@ import { fetcher } from "../utils";
 
 const Map = () => {
   const [map, setMap] = React.useState(null);
-
+  const defaultCenter = [35.0936, -106.6423];
   const [variables, setVariables] = React.useState({
     city: "Albuquerque",
   });
 
-  function handleFlyTo(arr) {
-    map.flyTo(arr, 14, {
-      duration: 2,
-    });
-  }
-  const defaultCenter = [35.0936, -106.6423];
+  const handleFlyTo = (arr) => map.flyTo(arr, 14, { duration: 2 });
+
   const { data } = useSWR([cityQuery, variables], fetcher);
   const hasCity = Boolean(data?.us_states[0]?.us_cities[0]);
+
   const markers = data?.us_states.map((el) => {
     const { state_code, state_name, us_cities } = el;
     const { latitude, longitude, city, county } = us_cities[0];
@@ -29,6 +27,7 @@ const Map = () => {
       <Marker key={el.id} position={[latitude, longitude]} animate={true}>
         <Popup>
           {city}, {county}
+          {state_name}
         </Popup>
       </Marker>
     );
@@ -36,25 +35,37 @@ const Map = () => {
 
   return (
     <>
-      <input
-        type="text"
-        value={variables.code}
-        onClick={
-          hasCity &&
-          handleFlyTo([
-            data?.us_states[0]?.us_cities[0].latitude,
-            data?.us_states[0]?.us_cities[0].longitude,
-          ])
-        }
-        onChange={(e) =>
-          setVariables((prevState) => ({
-            ...prevState,
-            city: e.target.value,
-          }))
-        }
-      />
-      <small>{hasCity ? `Fly me to ${variables.city}` : "Search "}</small>
-
+      <aside>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            hasCity &&
+              handleFlyTo([
+                data?.us_states[0]?.us_cities[0]?.latitude,
+                data?.us_states[0]?.us_cities[0]?.longitude,
+              ]);
+          }}
+        >
+          <input
+            placeholder="Enter the name of a US City"
+            type="text"
+            value={variables.code}
+            onChange={(e) => {
+              setVariables((prevState) => ({
+                ...prevState,
+                city: startCase(e.target.value.toLowerCase()),
+              }));
+            }}
+          />
+          <small>
+            <button>
+              {hasCity
+                ? `✈️✈️✈️Fly me to ${variables.city}, ${data?.us_states[0].state_name}✈️✈️✈️`
+                : "✈️✈️✈️Lets go somewhere!✈️✈️✈️"}
+            </button>
+          </small>
+        </form>
+      </aside>
       <MapContainer
         whenCreated={setMap}
         id="map"
