@@ -16,5 +16,9 @@ a {
 }
 
 #map {
-  height: 100vh;
+  height: 90vh;
+}
+
+input {
+  height: 10vh;
 }
