@@ -10,22 +10,23 @@ import { fetcher } from "../utils";
 
 const Map = () => {
   const [map, setMap] = React.useState(null);
+
   const defaultCenter = [35.0936, -106.6423];
+
   const [variables, setVariables] = React.useState({
     city: "Albuquerque",
   });
 
   const handleFlyTo = (arr) => map.flyTo(arr, 14, { duration: 2 });
 
-  const hasCity = Boolean(data?.us_states[0]?.us_cities[0]);
+  const [hasCity] = React.useState(Boolean(data?.us_cities));
+
   const { data } = useSWR([cityQuery, variables], fetcher);
+
   const markers = data?.us_cities.map((el) => {
     const { latitude, longitude, city, county } = el;
     const { state_code, state_name } = el.us_state;
-
-    console.log(el)
     return (
-
       <Marker key={el.id} position={[latitude, longitude]} animate={true}>
         <Popup>
           {city}, {county}
@@ -41,31 +42,36 @@ const Map = () => {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            hasCity &&
+            Boolean(data.us_cities) &&
               handleFlyTo([
-                data?.us_states[0]?.us_cities[0]?.latitude,
-                data?.us_states[0]?.us_cities[0]?.longitude,
+                data?.us_cities[0]?.latitude,
+                data?.us_cities[0]?.longitude,
               ]);
           }}
         >
           <input
             placeholder="Enter the name of a US City"
             type="text"
-            value={variables.code}
+            value={variables.city}
             onChange={(e) => {
               setVariables((prevState) => ({
                 ...prevState,
-                city: startCase(e.target.value.toLowerCase()),
+                city: e.target.value,
               }));
             }}
           />
           <small>
             <button>
-              {hasCity
-                ? `✈️✈️✈️Fly me to ${variables.city}, ${data?.us_states[0].state_name}✈️✈️✈️`
+              {Boolean(data?.us_cities)
+                ? `✈️✈️✈️Fly me to ${variables.city}, ${data?.us_cities[0]?.us_state.state_name}✈️✈️✈️`
                 : "✈️✈️✈️Lets go somewhere!✈️✈️✈️"}
             </button>
-            {data?.us_cities.length > 1 && <>There are {data?.us_cities.length} cities in the US with the name {variables.city}</> }
+            {data?.us_cities.length > 1 && (
+              <div>
+                There are <strong>{data?.us_cities.length}</strong> cities in
+                the US with the name <strong>{variables.city}</strong>
+              </div>
+            )}
           </small>
         </form>
       </aside>
