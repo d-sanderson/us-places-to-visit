@@ -27,6 +27,7 @@ const Map = () => {
   });
 
   const { data, error, isValidating } = useSWR([query, variables], fetcher);
+  
   const cities = data?.us_cities;
   const markers =
     cities &&
